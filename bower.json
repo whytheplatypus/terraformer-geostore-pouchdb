@@ -1,0 +1,10 @@
+{
+  "name": "terraformer-geostore-pouchdb",
+  "version": "0.0.1",
+  "main": "terraformer-geostore-pouchdb.min.js",
+  "ignore"        : ["versions", "spec"],
+  "dependencies": {
+    "terraformer": "~1.0.1",
+    "terraformer-geostore": "~1.0.1"
+  }
+}
