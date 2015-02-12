@@ -25,14 +25,15 @@
   // store the data at id returns true if stored successfully
   PouchStorage.prototype.add = function(geojson, callback){
     if(geojson.type === "FeatureCollection"){
-      for (var i = 0; i < geojson.features.length; i++) {
-        this.set(geojson.features[i]);
-      }
+      this._store.bulkDocs(geojson.features, function(err, response){
+        if(err){
+          callback(err, null);
+        } else {
+          callback(null, geojson);
+        }
+      });
     } else {
-      this.set(geojson);
-    }
-    if (callback) {
-      callback( null, geojson );
+      this.set(geojson, callback);
     }
   };
 
@@ -55,8 +56,14 @@
     this._store.get(id, callback);
   };
 
-  PouchStorage.prototype.set = function(feature){
-    this._store.put(feature);
+  PouchStorage.prototype.set = function(feature, callback){
+    this._store.put(feature, function(err, response){
+      if(err){
+        callback(err, null);
+      } else {
+        callback(null, feature);
+      }
+    });
   };
 
   PouchStorage.prototype.update = function(geojson, callback){
@@ -78,7 +85,7 @@
           callback(err, null);
         }
       } else {
-        for(var i = 0; i < response.rows.length){
+        for(var i = 0; i < response.rows.length; i++){
           var doc = response.rows[i].doc;
           //remove pouch this._store info
           delete doc._id;

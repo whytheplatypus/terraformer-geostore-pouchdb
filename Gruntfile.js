@@ -1,6 +1,6 @@
 module.exports = function (grunt) {
   grunt.initConfig({
-    aws: grunt.file.readJSON(process.env.HOME + '/terraformer-s3.json'),
+    // aws: grunt.file.readJSON(process.env.HOME + '/terraformer-s3.json'),
     pkg:   grunt.file.readJSON('package.json'),
 
     meta: {
@@ -42,6 +42,8 @@ module.exports = function (grunt) {
         options: {
           specs: 'spec/*Spec.js',
           helpers: [
+            './node_modules/pouchdb/dist/pouchdb.js',
+            './node_modules/pouchdb/dist/pouchdb.localstorage.js',
             './node_modules/terraformer/terraformer.js',
             './node_modules/terraformer-geostore/browser/terraformer-geostore.js'
           ],
@@ -74,37 +76,14 @@ module.exports = function (grunt) {
         }
       }
     },
-
-    s3: {
-      options: {
-        key: '<%= aws.key %>',
-        secret: '<%= aws.secret %>',
-        bucket: '<%= aws.bucket %>',
-        access: 'public-read',
-        headers: {
-          // 1 Year cache policy (1000 * 60 * 60 * 24 * 365)
-          "Cache-Control": "max-age=630720000, public",
-          "Expires": new Date(Date.now() + 63072000000).toUTCString()
-        }
-      },
-      dev: {
-        upload: [
-          {
-            src: 'versions/terraformer-geostore-pouchdb-<%= pkg.version %>.min.js',
-            dest: 'terraformer-geostore-pouchdb/<%= pkg.version %>/terraformer-geostore-pouchdb.min.js'
-          }
-        ]
-      }
-    }
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-complexity');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.loadNpmTasks('grunt-s3');
 
   grunt.registerTask('test', ['jasmine']);
   grunt.registerTask('default', [ 'jshint', 'jasmine', 'uglify', 'complexity' ]);
-  grunt.registerTask('version', [ 'default', 's3' ]);
+  grunt.registerTask('version', [ 'default' ]);
 };

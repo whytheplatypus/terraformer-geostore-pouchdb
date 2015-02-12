@@ -20,21 +20,26 @@ var featureCollection = {
   }
 };
 
-describe("pouchdb", function() {
+describe("PouchStorage", function() {
 
   it("should correctly add geojson as a point", function () {
+    var test_point = false;
 
-    var store = new Terraformer.GeoStore.PouchDB();
+    runs(function(){
+      var store = new Terraformer.GeoStore.PouchStorage();
+      store.add(point, function(err, response){
+        test_point = true;
+      });
+    })
 
-    var spy = jasmine.createSpy();
-    store.add(point, spy);
-
-    expect(spy).toHaveBeenCalledWith(null, point);
+    waitsFor(function(){
+      return test_point;
+    }, "The point should have stored", 1000);
   });
 
   it("should correctly update geojson as a point", function () {
 
-    var store = new Terraformer.GeoStore.PouchDB();
+    var store = new Terraformer.GeoStore.PouchStorage();
 
     var spy = jasmine.createSpy();
     store.update(point, spy);
@@ -43,18 +48,21 @@ describe("pouchdb", function() {
   });
 
   it("should correctly add geojson as a feature collection", function () {
-
-    var store = new Terraformer.GeoStore.PouchDB();
-
     var spy = jasmine.createSpy();
-    store.add(featureCollection, spy);
+    runs(function(){
+      var store = new Terraformer.GeoStore.PouchStorage();
 
-    expect(spy).toHaveBeenCalledWith(null, featureCollection);
+
+      store.add(featureCollection, spy);
+    });
+    waitsFor(function(){
+      return expect(spy).toHaveBeenCalledWith(null, featureCollection);
+    }, "The spy was never called for adding a geojson feature", 1000);
   });
 
   it("should correctly get a geojson from the store", function () {
 
-    var store = new Terraformer.GeoStore.PouchDB();
+    var store = new Terraformer.GeoStore.PouchStorage();
 
     var spy = jasmine.createSpy();
     store.add(point, function (err, geojson) {
@@ -67,7 +75,7 @@ describe("pouchdb", function() {
 
   it("should correctly remove a geojson from the store", function () {
 
-    var store = new Terraformer.GeoStore.PouchDB();
+    var store = new Terraformer.GeoStore.PouchStorage();
 
     var spy = jasmine.createSpy();
     store.add(point, function (err, geojson) {
@@ -84,7 +92,7 @@ describe("pouchdb", function() {
 
   it("should correctly serialize and deserialize", function () {
 
-    var store = new Terraformer.GeoStore.PouchDB();
+    var store = new Terraformer.GeoStore.PouchStorage();
     store.add(point);
 
     store.serialize(function (err, data) {
