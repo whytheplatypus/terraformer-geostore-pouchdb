@@ -28,12 +28,12 @@ describe("PouchStorage", function() {
     runs(function(){
       var store = new Terraformer.GeoStore.PouchStorage();
       store.add(point, function(err, response){
-        test_point = true;
+        test_point = response;
       });
     })
 
     waitsFor(function(){
-      return test_point;
+      return test_point === point;
     }, "The point should have stored", 1000);
   });
 
