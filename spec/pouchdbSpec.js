@@ -24,53 +24,74 @@ describe("PouchStorage", function() {
 
   it("should correctly add geojson as a point", function () {
     var test_point = false;
-
     runs(function(){
       var store = new Terraformer.GeoStore.PouchStorage();
       store.add(point, function(err, response){
+        if(err)
+          throw err;
         test_point = response;
       });
     })
 
     waitsFor(function(){
       return test_point === point;
-    }, "The point should have stored", 1000);
+    }, null, 1000);
   });
 
   it("should correctly update geojson as a point", function () {
 
-    var store = new Terraformer.GeoStore.PouchStorage();
+    var test_point = false;
+    runs(function(){
+      var store = new Terraformer.GeoStore.PouchStorage();
+      store.update(point, function(err, response){
+        if(err)
+          throw err;
+        test_point = response;
+      });
+    })
 
-    var spy = jasmine.createSpy();
-    store.update(point, spy);
-
-    expect(spy).toHaveBeenCalledWith(null, point);
+    waitsFor(function(){
+      return test_point === point;
+    }, null, 1000);
   });
 
   it("should correctly add geojson as a feature collection", function () {
-    var spy = jasmine.createSpy();
+
+    var collection = false;
     runs(function(){
       var store = new Terraformer.GeoStore.PouchStorage();
+      store.add(featureCollection, function(err, response){
+        if(err)
+          throw err;
+          collection = response;
+      });
+    })
 
-
-      store.add(featureCollection, spy);
-    });
     waitsFor(function(){
-      return expect(spy).toHaveBeenCalledWith(null, featureCollection);
-    }, "The spy was never called for adding a geojson feature", 1000);
+      return collection === featureCollection;
+    }, null, 1000);
   });
 
   it("should correctly get a geojson from the store", function () {
 
-    var store = new Terraformer.GeoStore.PouchStorage();
+    var test_point = false;
+    runs(function(){
+      var store = new Terraformer.GeoStore.PouchStorage();
+      store.add(point, function(err, response){
+        if(err)
+          throw err;
+        store.get("point", function(error, object){
+          test_point = object;
+          if(error)
+            throw error;
+        });
 
-    var spy = jasmine.createSpy();
-    store.add(point, function (err, geojson) {
-      expect(err).toBeNull();
-      expect(geojson).toEqual(point);
-      store.get("point", spy);
-      expect(spy).toHaveBeenCalledWith(null, point);
-    });
+      });
+    })
+
+    waitsFor(function(){
+      return test_point.id == point.id;
+    }, null, 5000);
   });
 
   it("should correctly remove a geojson from the store", function () {

@@ -25,6 +25,9 @@
   // store the data at id returns true if stored successfully
   PouchStorage.prototype.add = function(geojson, callback){
     if(geojson.type === "FeatureCollection"){
+      for(var i = 0; i < geojson.features.length; i++){
+        geojson.features[i]._id = geojson.features[i].id;
+      }
       this._store.bulkDocs(geojson.features, function(err, response){
         if(err){
           callback(err, null);
@@ -53,13 +56,27 @@
 
   // return the data stored at id
   PouchStorage.prototype.get = function(id, callback){
-    this._store.get(id, callback);
+    this._store.get(id, function(err, response){
+      if(err){
+        callback(err, null);
+      } else {
+        delete response._id;
+        delete response._rev;
+        callback(null, response);
+      }
+    });
   };
 
   PouchStorage.prototype.set = function(feature, callback){
+    var self = this;
+    feature._id = feature.id;
     this._store.put(feature, function(err, response){
       if(err){
-        callback(err, null);
+        if(err.status == 409){
+          self.update(feature, callback);
+        } else {
+          callback(err, null);
+        }
       } else {
         callback(null, feature);
       }
@@ -68,11 +85,19 @@
 
   PouchStorage.prototype.update = function(geojson, callback){
     var self = this;
+    geojson._id = geojson.id;
     this._store.get(geojson.id, function(err, otherDoc) {
       if(err){
         return callback(err, null);
       }
-      self._store.put(geojson, geojson.id, otherDoc._rev, callback);
+      self._store.put(geojson, otherDoc._rev, function(err, response){
+        if(err){
+          callback(err, null);
+        } else {
+          delete geojson._id;
+          callback(null, geojson);
+        }
+      });
     });
   };
 
