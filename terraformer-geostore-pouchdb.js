@@ -126,6 +126,8 @@
     this._store.put(feature, function(err, response){
       if(err){
         if(err.status == 409){
+          //it looks like pouch is unsetting id
+          feature.id = feature._id
           self.update(feature, callback);
         } else {
           callback(err, null);
